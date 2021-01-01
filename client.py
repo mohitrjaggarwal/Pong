@@ -1,6 +1,6 @@
 import pygame
 import random as r
-# from Network imoprt Network
+from Network import Network
 pygame.init()
 
 win = pygame.display.set_mode((700,400))
@@ -12,35 +12,35 @@ bg_music = pygame.mixer.music.load('badass music/batman.mp3')
 pygame.mixer.music.play(fade_ms=10000)
 
 
-class player1():
+class player():
 	# LEFT PLAYER
 
-	def __init__(self):
-		self.x, self.y = 15,175
+	def __init__(self,start_pos):
+		self.x, self.y = start_pos
 		self.speed = 10
 
 	def draw(self):
 		pygame.draw.rect(win,(255,255,255), (self.x,self.y, 10, 50))
 
 	def move(self):
-		if keys[pygame.K_w] and player1.y > 0:
-			player1.y -= player1.speed
-		elif keys[pygame.K_s] and player1.y < 350:
-			player1.y += player1.speed
+		if keys[pygame.K_UP] and player1.y > 0:
+			self.y -= self.speed
+		elif keys[pygame.K_DOWN] and player1.y < 350:
+			self.y += self.speed
 
 
-class player2(player1):
-	#RIGHT PLAYER
+# class player2(player1):
+# 	#RIGHT PLAYER
 
-	def __init__(self):
-		super().__init__()
-		self.x = 670
+# 	def __init__(self):
+# 		super().__init__()
+# 		self.x = 670
 
-	def move(self):
-		if keys[pygame.K_UP] and player2.y > 0:
-			player2.y -= player2.speed
-		elif keys[pygame.K_DOWN] and player2.y < 350:
-			player2.y += player2.speed	
+# 	def move(self):
+# 		if keys[pygame.K_UP] and player2.y > 0:
+# 			player2.y -= player2.speed
+# 		elif keys[pygame.K_DOWN] and player2.y < 350:
+# 			player2.y += player2.speed	
 
 
 class boom_ball():
@@ -84,30 +84,35 @@ def draw_stuff():
 	win.fill((0,0,0))
 	player1.draw()
 	player2.draw()
-	ball.draw()
+	# ball.draw()
 	pygame.display.update()
 
-def str_to_tup(arr):
+def read_pos(arr):
 	arr = arr.split(",")
 	return int(arr[0]) , int(arr[1])
 
-def tup_to_str(tup):
+def make_pos(tup):
 	return str(tup[0]) + "," + str(tup[1])
 
 
-# net = Network()
-# start_pos = str_to_tup(net.get_pos())
+net = Network()
+startpos = read_pos(net.get_pos())
 
-# player initiation
-player1 = player1()
-player2 = player2()
-ball = boom_ball()
+#player initiation
+player1 = player(startpos)
+player2 = player((685,175))
+# ball = boom_ball()
 
 
 run = True
 while run:
 	
 	clock.tick(35)
+
+	net.send(make_pos((player1.x,player1.y)))                                     # send my pos 
+	player2_pos = read_pos(net.receive())                                       # get player 2 pos
+	player2.x = player2_pos[0]                                                  # update player 2 pos
+	player2.y = player2_pos[1] 
 
 	for event in pygame.event.get():
 		if event.type==pygame.QUIT:
@@ -116,7 +121,7 @@ while run:
 	keys = pygame.key.get_pressed()
 	player1.move()
 	player2.move()
-	ball.move()
+	# ball.move()
 
 	draw_stuff()
 

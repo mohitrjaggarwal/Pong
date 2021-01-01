@@ -20,20 +20,37 @@ def init():        # INITIAL REQUIREMENTS
 
 init()
 
-def threaded_client(connection):
-	connection.send(str.encode("Connected!!"))    # when client.connect() executes in Network.py 
+def read_pos(arr):
+	arr = arr.split(",")
+	return int(arr[0]) , int(arr[1])
+
+def make_pos(tup):
+	return str(tup[0]) + "," + str(tup[1])
+
+
+current_client = 0
+client_pos = [(15,175),(685,175)]
+
+def threaded_client(connection,current_client):                            # when client.connect() executes in Network.py 
+	send_start_pos = make_pos(client_pos[current_client])
+	connection.send(str.encode(send_start_pos))
 
 	while True:
-		data = connection.recv(2048)
+		data = read_pos(connection.recv(2048).decode())
+		client_pos[current_client] = data
 
 		if not data:
 			print("Disconnected!!")
 			break
 		else:
-			reply = data.decode('utf-8')
-			print("Received...", reply)
-			msg_to_send = 'Fuck Off Bitch!!'
-			connection.send(str.encode(msg_to_send))
+			if current_client == 0:
+				reply = client_pos[1]
+			else:
+				reply = client_pos[0]
+
+			print("Received...", data)
+			print("Sending....", reply)
+			connection.send(str.encode(make_pos(reply)))
 
 	print("Closing connection")
 	connection.close()
@@ -41,8 +58,10 @@ def threaded_client(connection):
 
 while True:
 	conn, addr = s.accept()
-	print("Connnected to :", addr)
-	_thread.start_new_thread(threaded_client,(conn,))
+	if addr:
+		print("Connnected to :", addr)
+		_thread.start_new_thread(threaded_client,(conn,current_client))
+		current_client += 1
 
 
 

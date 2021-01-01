@@ -15,12 +15,16 @@ class Network:
 		return reply.decode()
 
 	def send(self,data):
-		self.client.send(str.encode(data))
-		x = self.client.recv(2048).decode()
+		try:
+			self.client.send(str.encode(data))
+		except socket.error as e:
+			print(e)
+
+	def receive(self):
+		try:
+			return self.client.recv(2048).decode()
+		except socket.error as e:
+			print(e)
 
 	def get_pos(self):
 		return self.pos
-
-
-
-
