@@ -29,30 +29,36 @@ def make_pos(tup):
 
 
 current_client = 0
-client_pos = [(15,175),(685,175)]
+client_pos = [(15,175),(685,175)]                                          # starting position of clients
 
 def threaded_client(connection,current_client):                            # when client.connect() executes in Network.py 
-	send_start_pos = make_pos(client_pos[current_client])
-	connection.send(str.encode(send_start_pos))
+	if current_client == 0:                                                
+		other_player_pos = 1
+	else:
+		other_player_pos = 0
 
+	send_start_pos = make_pos(client_pos[current_client])                  # "15,175"
+	send_other_player_pos = make_pos(client_pos[other_player_pos])         
+	connection.send(str.encode(send_start_pos))
+	connection.send(str.encode(send_other_player_pos))                     # sending other clients position to current client
+
+	
 	while True:
-		data = read_pos(connection.recv(2048).decode())
-		client_pos[current_client] = data
+		data = connection.recv(2048).decode()                  
 
 		if not data:
 			print("Disconnected!!")
 			break
 		else:
-			if current_client == 0:
-				reply = client_pos[1]
-			else:
-				reply = client_pos[0]
+			data = read_pos(data) 
+			client_pos[current_client] = data                               # update current clients pos on server
 
-			print("Received...", data)
-			print("Sending....", reply)
+			reply = client_pos[other_player_pos]                            # sending other client pos to current client
+			# print("Received...", data)
+			# print("Sending....", reply)
 			connection.send(str.encode(make_pos(reply)))
 
-	print("Closing connection")
+	print(f"Closing connection....{connection.getpeername()}")
 	connection.close()
 
 

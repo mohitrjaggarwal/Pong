@@ -11,8 +11,9 @@ class Network:
 
 	def connect(self):
 		self.client.connect(self.addr)
-		reply = self.client.recv(2048)
-		return reply.decode()
+		reply1 = self.client.recv(2048)
+		reply2 = self.client.recv(2048)
+		return reply1.decode() , reply2.decode()
 
 	def send(self,data):
 		try:
