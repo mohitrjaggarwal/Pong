@@ -1,5 +1,7 @@
 import socket
 import _thread
+import pickle
+from Player import Player
 
 
 def init():        # INITIAL REQUIREMENTS
@@ -20,43 +22,33 @@ def init():        # INITIAL REQUIREMENTS
 
 init()
 
-def read_pos(arr):
-	arr = arr.split(",")
-	return int(arr[0]) , int(arr[1])
-
-def make_pos(tup):
-	return str(tup[0]) + "," + str(tup[1])
-
-
 current_client = 0
-client_pos = [(15,175),(685,175)]                                          # starting position of clients
+players = [Player((15,175)),Player((685,175))]                             # Player instantiation
 
 def threaded_client(connection,current_client):                            # when client.connect() executes in Network.py 
 	if current_client == 0:                                                
-		other_player_pos = 1
+		other_player = 1
 	else:
-		other_player_pos = 0
+		other_player = 0
 
-	send_start_pos = make_pos(client_pos[current_client])                  # "15,175"
-	send_other_player_pos = make_pos(client_pos[other_player_pos])         
-	connection.send(str.encode(send_start_pos))
-	connection.send(str.encode(send_other_player_pos))                     # sending other clients position to current client
+	send_player = pickle.dumps(players[current_client])                    
+	send_other_player = pickle.dumps(players[other_player])
+	connection.send(send_player)
+	connection.send(send_other_player)                                     # sending other clients object to current client
 
 	
 	while True:
-		data = connection.recv(2048).decode()                  
+		data = connection.recv(2048)                 
 
 		if not data:
 			print("Disconnected!!")
 			break
 		else:
-			data = read_pos(data) 
-			client_pos[current_client] = data                               # update current clients pos on server
+			data = pickle.loads(data) 
+			players[current_client] = data                                  # update current client on server
 
-			reply = client_pos[other_player_pos]                            # sending other client pos to current client
-			# print("Received...", data)
-			# print("Sending....", reply)
-			connection.send(str.encode(make_pos(reply)))
+			reply = pickle.dumps(players[other_player])                     # sending other client to current client
+			connection.send(reply)
 
 	print(f"Closing connection....{connection.getpeername()}")
 	connection.close()

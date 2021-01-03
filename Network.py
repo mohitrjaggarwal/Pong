@@ -1,4 +1,5 @@
 import socket
+import pickle
 
 class Network:
 	server = '192.168.1.8'
@@ -7,25 +8,25 @@ class Network:
 	def __init__(self):
 		self.client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		self.addr = (self.server,self.port)
-		self.pos = self.connect()
+		self.players = self.connect()
 
 	def connect(self):
 		self.client.connect(self.addr)
-		reply1 = self.client.recv(2048)
-		reply2 = self.client.recv(2048)
-		return reply1.decode() , reply2.decode()
+		player1 = self.client.recv(2048)
+		player2 = self.client.recv(2048)
+		return pickle.loads(player1) , pickle.loads(player2)
 
 	def send(self,data):
 		try:
-			self.client.send(str.encode(data))
+			self.client.send(pickle.dumps(data))
 		except socket.error as e:
 			print(e)
 
 	def receive(self):
 		try:
-			return self.client.recv(2048).decode()
+			return pickle.loads(self.client.recv(2048))
 		except socket.error as e:
 			print(e)
 
-	def get_pos(self):
-		return self.pos
+	def get_players(self):
+		return self.players
