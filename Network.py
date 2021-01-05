@@ -8,13 +8,15 @@ class Network:
 	def __init__(self):
 		self.client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		self.addr = (self.server,self.port)
-		self.players = self.connect()
+		self.players_ball = self.connect()
 
 	def connect(self):
 		self.client.connect(self.addr)
 		player1 = self.client.recv(2048)
 		player2 = self.client.recv(2048)
-		return pickle.loads(player1) , pickle.loads(player2)
+		ball = self.client.recv(2048)
+		return pickle.loads(player1) , pickle.loads(player2), pickle.loads(ball)
+
 
 	def send(self,data):
 		try:
@@ -22,11 +24,17 @@ class Network:
 		except socket.error as e:
 			print(e)
 
-	def receive(self):
+	def receive_ball(self):
 		try:
 			return pickle.loads(self.client.recv(2048))
 		except socket.error as e:
 			print(e)
 
-	def get_players(self):
-		return self.players
+	def receive_player(self):
+		try:
+			return pickle.loads(self.client.recv(2048))
+		except socket.error as e:
+			print(e)
+
+	def get_players_ball(self):
+		return self.players_ball
