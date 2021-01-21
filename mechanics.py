@@ -18,6 +18,9 @@ class Player():
 		elif keys[pygame.K_DOWN] and self.y < 350:
 			self.y += self.speed
 
+	def __len__(self):
+		return 1                    # this is just for convinience in server.py line 48.
+
 
 
 class Ball():
@@ -25,7 +28,7 @@ class Ball():
 
 	def __init__(self):
 		self.x, self.y = 350, 200
-		self.speed = r.choices([-10,10],k=2)      #ball speed = 10
+		self.speed = r.choices([-10,10],k=2)      # ball speed = |10|
 
 	def draw(self,screen,p1):
 		if self.crash == True:
@@ -49,12 +52,12 @@ class Ball():
 		elif (self.y - 7 < 20) or (self.y + 7 > 380):
 			self.speed[1] = -self.speed[1]
 		elif self.x > 680 or self.x < 15:
-			self.point_lost()
+			self.point_lost(players)
 
 		self.x += self.speed[0] 
 		self.y += self.speed[1]
 
-	def point_lost(self):
+	def point_lost(self,players):
 		self.crash = True
 		self.__init__()
 		players[0].__init__()

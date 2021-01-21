@@ -1,5 +1,4 @@
 import pygame
-import random as r
 import pickle
 from network import Network
 from mechanics import Player, Ball
@@ -23,7 +22,9 @@ def draw_stuff():
 
 net = Network()                                            # connect to server
 player1, player2, ball = net.get_players_ball()                       # player initiation
-print(type(ball))                                                  # debugging statement
+print(player1.x,player1.y)                                            # debugging statement
+print(player2.x,player2.y)                                            # debugging statement
+print(ball.x,ball.y)                                                  # debugging statement
 
 run = True
 while run:
@@ -42,4 +43,3 @@ while run:
 	draw_stuff()
 
 pygame.quit()
-

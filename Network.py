@@ -2,7 +2,7 @@ import socket
 import pickle
 
 class Network:
-	server = '192.168.1.8'
+	server = 'servers local IP'
 	port = 5555
 
 	def __init__(self):
@@ -11,7 +11,7 @@ class Network:
 		self.players_ball = self.connect()
 
 	def connect(self):
-		self.client.connect(self.addr)
+		self.client.connect(self.addr)                     # connects to the server
 		player1 = self.client.recv(2048)
 		player2 = self.client.recv(2048)
 		ball = self.client.recv(2048)

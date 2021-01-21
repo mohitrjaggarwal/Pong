@@ -1,5 +1,5 @@
 import socket
-import _thread
+import threading
 import pickle
 import random as r
 from mechanics import Player, Ball
@@ -8,7 +8,7 @@ from mechanics import Player, Ball
 def init():        # INITIAL REQUIREMENTS
 	global s
 
-	server = '0.0.0.0'
+	server = 'my local IP'                         #'0.0.0.0'
 	port = 5555
 	s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
@@ -26,9 +26,9 @@ init()
 player_ever_joined = False
 current_client = 0
 ball = Ball()                                                              # Ball initiation
-players = [Player((15,175)),Player((685,175))]                             # Player instantiation
+players = [Player((15,175)),Player((685,175))]                             # Player instantiation cum database
 
-def threaded_client(connection,current_client):                            # when client.connect() executes in Network.py 
+def threaded_client(connection,current_client):                             
 	if current_client == 0:                                                
 		other_player = 1
 	else:
@@ -43,21 +43,17 @@ def threaded_client(connection,current_client):                            # whe
 
 	
 	while True:
-		try:
-			data = connection.recv(2048)
-		except Exception as e:
-			print(e)
-			break
+		data = pickle.loads(connection.recv(2048))
 
-		if not data:
+		if len(data)==0:
 			print("Disconnected!!")
 			break
+
 		else:
-			data = pickle.loads(data) 
 			players[current_client] = data                                  # update current client on server
 
-			send_ball = pickle.dumps(ball)
 			reply = pickle.dumps(players[other_player])                     # sending other client to current client
+			send_ball = pickle.dumps(ball)
 			connection.send(reply)
 			connection.send(send_ball)
 
@@ -67,15 +63,18 @@ def threaded_client(connection,current_client):                            # whe
 
 
 while True:
-	conn, addr = s.accept()
-	if addr:
+	conn, addr = s.accept()        
+	if addr:                                                            # when client.connect() executes in Network.py
 		print("Connnected to :", addr)
-		_thread.start_new_thread(threaded_client,(conn,current_client))
+		thread = threading.Thread(target=threaded_client, args=(conn,current_client))
+		thread.start()
+		print("Thread started..[ACTIVE CONNECTIONS] = {}".format(threading.activeCount()-1))
 		current_client += 1
 		player_ever_joined = True
 
 	if current_client==2:
-		ball.move(players)
+		ball.move(players)                                    
 
-	if player_ever_joined and current_client==0:
+	if player_ever_joined and current_client==0:              # Close the connection if both clients have disconnected.
 		s.close()
+		print("Server socket closed!")
